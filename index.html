@@ -69,24 +69,32 @@
     </form>
 
     <section id="error-btns">
-      <button>Console Log</button>
-      <button>Console Error</button>
-      <button>Console Count</button>
-      <button>Console Warn</button>
-      <button>Console Assert</button>
-      <button>Console Clear</button>
-      <button>Console Dir</button>
-      <button>Console dirxml</button>
-      <button>Console Group Start</button>
-      <button>Console Group End</button>
-      <button>Console Table</button>
-      <button>Start Timer</button>
-      <button>End Timer</button>
-      <button>Console Trace</button>
-      <button>Trigger a Global Error</button>
+      <button id="consoleLog">Console Log</button>
+      <button id="consoleError">Console Error</button>
+      <button id="consoleCount">Console Count</button>
+      <button id="consoleWarn">Console Warn</button>
+      <button id="consoleAssert">Console Assert</button>
+      <button id="consoleClear">Console Clear</button>
+      <button id="consoleDir">Console Dir</button>
+      <button id="consoleDirxml">Console dirxml</button>
+      <button id="consoleGroupStart">Console Group Start</button>
+      <button id="consoleGroupEnd">Console Group End</button>
+      <button id="consoleTable">Console Table</button>
+      <button id="consoleStartTimer">Start Timer</button>
+      <button id="consoleEndTimer">End Timer</button>
+      <button id="consoleTrace">Console Trace</button>
+      <button id="consoleGlobalError">Trigger a Global Error</button>
     </section>
   </main>
 
+  <script src="https://cdn.trackjs.com/agent/v3/latest/t.js"></script>
+  <script>
+    window.TrackJS && TrackJS.install({ 
+      token: "69f29842f05e4fe3ae5df6dee591cd57"
+      // for more configuration options, see https://docs.trackjs.com
+    });
+  </script>
+                        
   <script>
     let form = document.querySelector('form');
     form.addEventListener('submit', e => {
@@ -95,13 +103,91 @@
       let firstNum = document.querySelector('#first-num').value;
       let secondNum = document.querySelector('#second-num').value;
       let operator = document.querySelector('#operator').value;
-      output.innerHTML = eval(`${firstNum} ${operator} ${secondNum}`);
+      try {
+        if (operator === '/' && secondNum == 0) throw new Error("Division by zero");
+        output.innerHTML = eval(`${firstNum} ${operator} ${secondNum}`);
+      } catch (error) {
+        output.innerHTML = "Error: " + error.message;
+      } finally {
+        console.log("Calculation attempted.");
+      }
     });
 
     let errorBtns = Array.from(document.querySelectorAll('#error-btns > button'));
 
     // Start your code here
     // You may move this JS to another file if you wish
+    document.getElementById("consoleLog").onclick = function() {console.log("This is a console log.");};
+    document.getElementById("consoleError").onclick = function() {console.error("This is a console error.");};
+    document.getElementById("consoleCount").onclick = function() {console.count('This is a console count.');};
+    document.getElementById("consoleWarn").onclick = function() {console.warn("This is a warning.")};
+    document.getElementById("consoleAssert").onclick = function() {testAssert()};
+    document.getElementById("consoleClear").onclick = function() {console.clear()};
+    document.getElementById("consoleDir").onclick = function() {console.dir(document.head)};
+    document.getElementById("consoleDirxml").onclick = function() {console.dirxml(document)};
+    document.getElementById("consoleGroupStart").onclick = function() {console.group(); console.log("This is inside of a group!")};
+    document.getElementById("consoleGroupEnd").onclick = function() {console.groupEnd(); console.log("This is not inside of a group!")};
+    document.getElementById("consoleTable").onclick = function() {testConsoleTable()};
+    document.getElementById("consoleStartTimer").onclick = function() {console.time()};
+    document.getElementById("consoleEndTimer").onclick = function() {console.timeEnd()};
+    document.getElementById("consoleTrace").onclick = function() {testTrace()};
+    document.getElementById("consoleGlobalError").onclick = function() {testGlobalError()};
+
+    function testAssert (){
+      const x = 9;
+      const y = 3;
+      const reason = 'x is expected to be less than y';
+      console.assert(x < y, {x, y, reason});
+    }
+
+    function testConsoleTable (){
+      var people = [
+      {
+        first: 'bob',
+        last: 'joe',
+      },
+      {
+        first: 'jimmy',
+        last: 'john',
+      },
+      {
+        first: 'amy',
+        last: 'smith',
+      }
+      ];
+      console.table(people);
+    }
+
+    function testTrace (){
+      const first = () => { second(); };
+      const second = () => { third(); };
+      const third = () => { fourth(); };
+      const fourth = () => { console.trace(); };
+      first();
+    }
+
+    class CustomError extends Error {
+      constructor(message) {
+        super(message);
+        this.name = "CustomError";
+      }
+    }
+
+    try {
+      throw new CustomError("This is a custom error!");
+    } catch (error) {
+      console.error(error.name + ": " + error.message);
+    }
+
+    window.onerror = function (message, source, lineno, colno, error) {
+      console.log("Global error caught: " + message);
+      return true;
+    };
+
+    function testGlobalError() {
+      nonExistentFunction();
+    }
+
   </script>
 </body>
 
